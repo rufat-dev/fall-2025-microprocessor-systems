@@ -1,62 +1,43 @@
-//task 1
-//
-// Blink the Arduino’s built-in LED using four different register-level
-// methods.
-// First, use direct assignment by writing full binary or hex values to the PORT register. Second, use
-// bit set/clear (masking) with bitwise OR (|=) and AND (&= ~) to control the LED pin. Third, use
-// bit toggle with XOR (^=) or the PINx register to flip the LED state. Finally, use shift operations
-// (<< or >>) to move a bit across positions and apply it for blinking.
 
-uint8_t method = 0; // Current method (0-3)
-uint8_t ledState = 0; // LED state for blinking
+uint8_t ledState = 0;
 
 void setup() {
-  Serial.begin(9600);
-  DDRB |= (1 << PB5); // Set pin 13 as output
+  DDRB |= (1 << PB5);
+  PORTB |= (1 << PB5);
 }
 
-//first method
-
 void loop() {
-  // Method 1: Direct assignment with binary/hex values
-  if (ledState) {
-    PORTB = 0b00100000; // Turn on LED with binary
+  if (!ledState) {
+    PORTB = 0b00100000;
   } else {
-    PORTB = 0b00000000; // Turn off LED with binary
+    PORTB = 0b00000000;
   }
   ledState = !ledState;
   
-  delay(500); // Blink every 500ms
+  delay(500);
 }
 
-//second method
-
 void loop() {
-  if (ledState) {
-    PORTB |= (1 << PB5);  // Set bit using OR
+  if (!ledState) {
+    PORTB |= (1 << PB5);
   } else {
-    PORTB &= ~(1 << PB5); // Clear bit using AND with NOT
+    PORTB &= ~(1 << PB5);
   }
   ledState = !ledState;
-  delay(500); // Blink every 500ms
+  delay(500);
 }
 
-//third method
-
 void loop() {
-  PORTB ^= (1 << PB5); // Toggle LED using XOR
-  ledState = !ledState;
-  delay(500); // Blink every 500ms
+  PORTB ^= (1 << PB5);
+  delay(500);
 }
 
-//last method
-
 void loop() {
-  if (ledState) {
-    PORTB <<= 1; // Shift PORTB left to turn off LED
+  if (!ledState) {
+    PORTB <<= 1;
   } else {
-    PORTB >>= 1; // Shift PORTB right to turn on LED
+    PORTB >>= 1;
   }
   ledState = !ledState;
-  delay(500); // Blink every 500ms
+  delay(500);
 }

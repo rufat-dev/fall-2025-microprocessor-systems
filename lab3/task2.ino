@@ -1,14 +1,5 @@
-//Task 2
-// Write an AVR assembly program that calculates the sum of the first
-// ten natural numbers entirely in registers.
-// One method to do this: use one register as a counter starting from 1, a second register to hold
-// the running sum (initially 0), and a third register as the limit set to 10. In a loop, add the counter
-// to the sum with ADD, increment the counter with INC, then compare it against the limit using CP
-// and repeat with BRNE until the counter reaches 10, leaving the final result (55 = 0x37) stored in
-// the second.
-// instructions: ADD, INC, CP (compare) and BRNE (branch if not equal).
 
-uint8_t sum = 0; // Variable to store the final result
+uint8_t sum = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -33,5 +24,4 @@ void setup() {
 }
 
 void loop() {
-  // Empty loop
 }
