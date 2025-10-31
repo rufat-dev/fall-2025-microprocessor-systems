@@ -1,9 +1,11 @@
 
+//we initialize the sum variable so that we can pass it to serial.print
 uint8_t sum = 0;
 
 void setup() {
   Serial.begin(9600);
   
+  //calculating sum of numbers from 1 to 10 using assembly
   asm volatile (
     "ldi r18, 0 \n\t"
     "ldi r19, 0 \n\t"
