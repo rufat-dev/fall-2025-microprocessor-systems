@@ -1,0 +1,73 @@
+#include <Wire.h>
+
+volatile unsigned long lastTime = 0;
+volatile uint8_t lastButtonState = (1 << PD2);
+volatile uint8_t lastMessage = 1;
+
+bool masterButtonState = false;
+
+/* Called when master WRITES to slave */
+void onReceive(int bytes)
+{
+  while (Wire.available()) {
+    uint8_t v = Wire.read();
+    if(v==1){
+      TWBR = ((16000000/25000) - 16) /(2*4);
+      TWSR = 0b00000001;  // prescaler = 4
+    }else if(v==2){
+      TWBR = ((16000000/100000) - 16) /(2);
+      TWSR = 0b00000000;  // prescaler = 4   
+    }else if(v==3){
+      
+      TWBR = ((16000000/400000) - 16) /(2);
+      TWSR = 0b00000000;  // prescaler = 4   
+    }else{
+      PORTB ^= (1 << PB5);
+    }
+  }
+}
+
+/* Called when master READS from slave */
+void onRequest()
+{
+  if(masterButtonState){
+    Wire.write(1);
+  }else{
+    Wire.write(0);
+  }
+}
+
+void setup()
+{
+  DDRD &= ~(1 << PD2);
+  PORTD |= (1 << PD2);
+
+  // Setup LED output (PB5)
+  DDRB |= (1 << PB5);
+  PORTB &= ~(1 << PB5);
+
+  Wire.begin(4); // master
+  TWSR &= ~((1 << TWPS0) | (1 << TWPS1));  // Clear bits 0 and 1
+  TWSR |= (1 << TWPS0);  // Set bit 0
+  TWBR = ((16000000/25000) - 16) /(2*4);
+  TWSR = 0b00000001;  // prescaler = 4   
+
+  Wire.onReceive(onReceive);
+  Wire.onRequest(onRequest);
+
+}
+
+void loop()
+{
+    uint8_t buttonState = (PIND & (1 << PD2)); 
+    if(lastButtonState && !buttonState){
+      unsigned long now = millis();
+      if (now - lastTime > 250) {   // debounce window (ms)
+        masterButtonState = !masterButtonState;
+      }
+      lastTime = now;
+    }
+    lastButtonState = buttonState;
+
+}
+    
