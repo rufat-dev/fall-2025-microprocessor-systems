@@ -5,17 +5,16 @@
 uint16_t index = 0;
 
 void UART_init(void) {
-    // Baud rate = 9600 @ 16 MHz
     UBRR0H = 0;
     UBRR0L = 103;
 
-    UCSR0A = 0x00;   // normal speed
-    UCSR0B = (1 << RXEN0) | (1 << TXEN0);  // Enable RX & TX
-    UCSR0C = (1 << UCSZ01) | (1 << UCSZ00); // 8-bit, 1 stop, no parity
+    UCSR0A = 0x00;
+    UCSR0B = (1 << RXEN0) | (1 << TXEN0);
+    UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
 }
 
 uint8_t UART_recv(void) {
-    while (!(UCSR0A & (1 << RXC0)));   // wait until data received
+    while (!(UCSR0A & (1 << RXC0)));
     return UDR0;
 }
 
@@ -27,7 +26,7 @@ uint8_t EEPROM_read(uint16_t addr) {
     return eeprom_read_byte((uint8_t*)addr);
 }
 void UART_send(uint8_t d) {
-    while (!(UCSR0A & (1 << UDRE0)));  // wait until TX buffer empty
+    while (!(UCSR0A & (1 << UDRE0)));
     UDR0 = d;
 }
 
