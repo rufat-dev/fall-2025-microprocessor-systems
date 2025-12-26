@@ -43,6 +43,8 @@ const uint8_t segmentPatterns[10] = {
     0b01111111,
     0b01101111
 };
+
+
 volatile uint8_t enabled = 0;
 volatile unsigned long lastTime = 0;
 
@@ -68,29 +70,24 @@ void setup(void) {
 }
 
 ISR(TIMER1_COMPA_vect) {
-    
-  if(enabled){
-    uint8_t segs = readSegments();
-    int current = getDigitFromSegments(segs);
+    if(enabled){
+        uint8_t segs = readSegments();
+        int current = getDigitFromSegments(segs);
 
-    if (current == -1) return;
-    int next = (current + 1) % 10;
+        if (current == -1) return;
+        int next = (current + 1) % 10;
 
-     displayDigit(next);
-  }
+        displayDigit(next);
+    }
 }
 
 ISR(INT0_vect)
 {
     unsigned long now = millis();
-    Serial.println("time:");
-    Serial.println(now);
-    Serial.println(lastTime);
     if (now - lastTime > 250) {
         enabled = !enabled;
     }
     lastTime = now;
-  Serial.println(enabled);
 }
 
 void displayDigit(uint8_t num) {

@@ -1,5 +1,3 @@
-
-#include <Arduino.h>
 #include <stdint.h>
 
 const uint8_t SECRET_KEY = 0x5A;
