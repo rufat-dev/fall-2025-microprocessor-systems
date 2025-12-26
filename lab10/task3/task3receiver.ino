@@ -18,13 +18,21 @@ uint8_t UART_recv(void) {
     return UDR0;
 }
 
+
 void EEPROM_write(uint16_t addr, uint8_t data) {
-    eeprom_write_byte((uint8_t*)addr, data);
+    while (EECR & (1 << EEPE));
+    EEAR = addr;
+    EEDR = data;
+    EECR |= (1 << EEMPE);
+    EECR |= (1 << EEPE);
+}
+uint8_t EEPROM_read(uint16_t addr) {
+    while (EECR & (1 << EEPE));
+    EEAR = addr;
+    EECR |= (1 << EERE);
+    return EEDR;
 }
 
-uint8_t EEPROM_read(uint16_t addr) {
-    return eeprom_read_byte((uint8_t*)addr);
-}
 void UART_send(uint8_t d) {
     while (!(UCSR0A & (1 << UDRE0)));
     UDR0 = d;
@@ -42,18 +50,19 @@ void loop() {
     if (r == '1' || r == '2' || r == '3') {
        EEPROM_write(index, r);
       _delay_ms(2);
+      uint8_t v = EEPROM_read(index);
+      UART_send(v); 
        index++;
-        UART_send('0' + index); 
       _delay_ms(2);
       
     }else if(r == '4'){
 
         for(uint16_t i = 0; i<index; i++){
             UART_send('0' + i); 
-          _delay_ms(2);
+             _delay_ms(2);
             uint8_t v = EEPROM_read(i);
             UART_send(v); 
-          _delay_ms(2);
+            _delay_ms(2);
 
             PORTD &= ~((1<<LED1)|(1<<LED2)|(1<<LED3));
 
@@ -65,6 +74,5 @@ void loop() {
         }
         index = 0;
     }
-  
     
 }

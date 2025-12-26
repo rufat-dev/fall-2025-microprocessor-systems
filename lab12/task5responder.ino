@@ -3,7 +3,7 @@
 volatile unsigned long lastTime = 0;
 volatile uint8_t lastButtonState = (1 << PD2);
 
-bool masterButtonState = false;
+bool masterState = false;
 
 void onReceive(int bytes)
 {
@@ -17,7 +17,7 @@ void onReceive(int bytes)
 
 void onRequest()
 {
-  if(masterButtonState){
+  if(masterState){
     Wire.write(1);
   }else{
     Wire.write(0);
@@ -49,7 +49,7 @@ void loop()
     if(lastButtonState && !buttonState){
       unsigned long now = millis();
       if (now - lastTime > 250) {
-        masterButtonState = !masterButtonState;
+        masterState = !masterState;
       }
       lastTime = now;
     }

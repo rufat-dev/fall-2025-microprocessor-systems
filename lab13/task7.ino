@@ -17,7 +17,8 @@ bool getBit(int index) {
 
 void setup() {
   Serial.begin(9600);
-
+  DDRB |= (1 << PB5);
+  PORTB &= ~(1 << PB5); 
   unsigned long start = micros();
 
   for (int i = 0; i <= (MAX_LIMIT >> 3); i++) sieve[i] = 0xFF;
@@ -44,6 +45,8 @@ void setup() {
         }
       }
       if (isPrime) count++;
+      PORTB |= (1 << PB5); 
+      PORTB &= ~(1 << PB5); 
     }
 
   unsigned long end = micros();
