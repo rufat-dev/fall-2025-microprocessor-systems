@@ -1,27 +1,40 @@
+// Lab 14 - Task 9: Speck32/64 Cipher in CTR Mode (Receiver)
+// Hardware: ATmega328P (Arduino Uno R3)
+// Description: Receives encrypted data over UART and decrypts using Speck32/64 in CTR mode.
+// Synchronizes with transmitter using TAG, receives nonce, then decrypts ciphertext stream.
+// CTR mode: same keystream generation as encryption, XOR with ciphertext to decrypt.
+// Block size: 32 bits, Key size: 64 bits, Rounds: 22
+
 #include <stdint.h>
 
-#define SPECK_ROUNDS   22
-#define KEY_WORDS      4
-#define BLOCK_BYTES    4
-#define UART_BAUD      9600
+#define SPECK_ROUNDS   22   // Number of Speck encryption rounds
+#define KEY_WORDS      4    // Key size: 4 words (64 bits total)
+#define BLOCK_BYTES    4    // Block size: 4 bytes (32 bits)
+#define UART_BAUD      9600 // UART baud rate
 
+// Synchronization tag: must match transmitter
 static const uint8_t TAG[4] = { 'K', 'E', 'Y', '!' };
 
+// Master key: 64 bits (must match transmitter)
 static const uint16_t KEY[KEY_WORDS] = {
   0xA1B2, 0xC3D4, 0xE5F6, 0x1357
 };
 
-static uint16_t roundKey[SPECK_ROUNDS];
+static uint16_t roundKey[SPECK_ROUNDS];  // Expanded round keys
 
+// Rotate right: circular right shift by r bits (0-15)
 static inline uint16_t ror16(uint16_t v, uint8_t r) {
   r &= 15;
   return (uint16_t)((v >> r) | (uint16_t)(v << (16 - r)));
 }
+
+// Rotate left: circular left shift by r bits (0-15)
 static inline uint16_t rol16(uint16_t v, uint8_t r) {
   r &= 15;
   return (uint16_t)((uint16_t)(v << r) | (v >> (16 - r)));
 }
 
+// Speck key schedule: expands 64-bit master key into 22 round keys
 static void makeRoundKeys(const uint16_t k[KEY_WORDS], uint16_t rk[SPECK_ROUNDS]) {
   uint16_t L[3] = { k[0], k[1], k[2] };
   rk[0] = k[3];
@@ -35,6 +48,8 @@ static void makeRoundKeys(const uint16_t k[KEY_WORDS], uint16_t rk[SPECK_ROUNDS]
   }
 }
 
+// Speck block encryption: encrypts 32-bit block (two 16-bit words)
+// Note: In CTR mode, decryption uses same encryption function
 static void speckEncryptBlock(uint16_t &a, uint16_t &b, const uint16_t rk[SPECK_ROUNDS]) {
   for (uint8_t i = 0; i < SPECK_ROUNDS; ++i) {
     a = (uint16_t)((ror16(a, 7) + b) ^ rk[i]);
